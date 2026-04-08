@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TypeScript Roadmap</title>
+    <title>TypeScript Full Info</title>
     <style>
       html,
       body {
@@ -238,13 +238,24 @@
 
       /* ── Topic Grid ── */
       .phase-body {
-        padding: 0 22px 20px;
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      .phase-body.collapsed {
+        grid-template-rows: 0fr;
+      }
+      .phase-body-inner {
+        overflow: hidden;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
+        padding: 0 22px 20px;
+        opacity: 1;
+        transition: opacity 0.2s ease;
       }
-      .phase-body.collapsed {
-        display: none;
+      .phase-body.collapsed .phase-body-inner {
+        opacity: 0;
       }
 
       /* ── Topic Card ── */
@@ -307,15 +318,27 @@
 
       /* ── Topic Content (Expanded Lesson) ── */
       .topic-content {
-        display: none;
-        margin-top: 18px;
-        padding-top: 18px;
-        border-top: 1px solid var(--rm-border);
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    margin-top 0.35s ease;
+        margin-top: 0;
         min-width: 0;
-        overflow: hidden;
       }
       .topic.active .topic-content {
-        display: block;
+        grid-template-rows: 1fr;
+        margin-top: 18px;
+      }
+      .topic-content-inner {
+        overflow: hidden;
+        padding-top: 18px;
+        border-top: 1px solid var(--rm-border);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .topic.active .topic-content-inner {
+        opacity: 1;
+        transition: opacity 0.35s ease 0.1s;
       }
 
       .topic-content h3 {
@@ -518,7 +541,7 @@
           margin: 0 16px 12px;
         }
 
-        .phase-body {
+        .phase-body-inner {
           padding: 0 16px 16px;
           grid-template-columns: 1fr;
           gap: 10px;
@@ -536,8 +559,10 @@
           font-size: 13px;
         }
 
-        .topic-content {
+        .topic.active .topic-content {
           margin-top: 14px;
+        }
+        .topic-content-inner {
           padding-top: 14px;
         }
 
@@ -629,7 +654,7 @@
           height: 4px;
         }
 
-        .phase-body {
+        .phase-body-inner {
           padding: 0 14px 14px;
           grid-template-columns: 1fr;
           gap: 8px;
@@ -654,8 +679,10 @@
           font-size: 10px;
         }
 
-        .topic-content {
+        .topic.active .topic-content {
           margin-top: 12px;
+        }
+        .topic-content-inner {
           padding-top: 12px;
         }
 
@@ -1331,6 +1358,121 @@ id = <span class="num">123</span>;    <span class="cm">// OK</span>
               </div>
             </div>
           </div>
+
+          <!-- 1.7 Type Assertions -->
+          <div class="topic">
+            <div class="topic-header">
+              <div>
+                <div class="topic-name">Type assertions</div>
+                <div class="topic-desc">
+                  as keyword, non-null !, satisfies operator
+                </div>
+              </div>
+              <span class="topic-toggle">▼</span>
+            </div>
+            <div class="topic-content">
+              <h3>Type Assertions</h3>
+              <p>
+                Sometimes you know more about a value's type than TypeScript
+                does. <strong>Type assertions</strong> let you tell TS to treat
+                a value as a specific type. They don't change the value at
+                runtime — they only affect type checking.
+              </p>
+
+              <pre><span class="cm">// as keyword — assert a more specific type</span>
+<span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">"email"</span>) <span class="kw">as</span> <span class="tp">HTMLInputElement</span>;
+input.value = <span class="str">"hello@example.com"</span>; <span class="cm">// OK — TS knows it's an input</span>
+
+<span class="cm">// Without assertion, TS only knows it's HTMLElement | null</span>
+<span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">"email"</span>);
+<span class="cm">// el.value; // Error! HTMLElement has no .value</span>
+
+<span class="cm">// Double assertion — escape hatch (use very rarely!)</span>
+<span class="kw">const</span> x = (<span class="str">"hello"</span> <span class="kw">as</span> <span class="tp">unknown</span>) <span class="kw">as</span> <span class="tp">number</span>; <span class="cm">// compiles, but wrong!</span></pre>
+
+              <p>
+                <strong>Non-null assertion (<code>!</code>)</strong> — tells TS
+                a value is definitely not null or undefined:
+              </p>
+              <pre><span class="cm">// You know this element exists in your HTML</span>
+<span class="kw">const</span> app = document.<span class="fn">getElementById</span>(<span class="str">"app"</span>)!; <span class="cm">// HTMLElement (not null)</span>
+
+<span class="cm">// Useful with Map.get() when you know the key exists</span>
+<span class="kw">const</span> map = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="tp">string</span>, <span class="tp">number</span>&gt;();
+map.<span class="fn">set</span>(<span class="str">"count"</span>, <span class="num">42</span>);
+<span class="kw">const</span> count = map.<span class="fn">get</span>(<span class="str">"count"</span>)!; <span class="cm">// number (not undefined)</span>
+
+<span class="cm">// ⚠️ Use sparingly — if you're wrong, you get a runtime error</span></pre>
+
+              <p>
+                <strong>The <code>satisfies</code> operator</strong> (TS 4.9+)
+                — validates a value matches a type without widening it:
+              </p>
+              <pre><span class="kw">type</span> <span class="tp">Color</span> = <span class="str">"red"</span> | <span class="str">"green"</span> | <span class="str">"blue"</span>;
+<span class="kw">type</span> <span class="tp">Theme</span> = <span class="tp">Record</span>&lt;<span class="tp">string</span>, <span class="tp">Color</span> | <span class="tp">Color</span>[]&gt;;
+
+<span class="cm">// Without satisfies — TS widens types, loses specifics</span>
+<span class="kw">const</span> theme1: <span class="tp">Theme</span> = {
+  primary: <span class="str">"red"</span>,
+  secondary: [<span class="str">"green"</span>, <span class="str">"blue"</span>],
+};
+<span class="cm">// theme1.primary is Color | Color[] — too wide!</span>
+
+<span class="cm">// With satisfies — validates AND preserves narrow types</span>
+<span class="kw">const</span> theme2 = {
+  primary: <span class="str">"red"</span>,
+  secondary: [<span class="str">"green"</span>, <span class="str">"blue"</span>],
+} <span class="kw">satisfies</span> <span class="tp">Theme</span>;
+<span class="cm">// theme2.primary is "red" — exact literal type preserved!</span>
+<span class="cm">// theme2.secondary is ("green" | "blue")[] — array preserved!</span></pre>
+
+              <p>
+                <strong>const assertions</strong> — freeze values to their
+                narrowest literal types:
+              </p>
+              <pre><span class="cm">// Without as const — types are widened</span>
+<span class="kw">const</span> config1 = { api: <span class="str">"/users"</span>, method: <span class="str">"GET"</span> };
+<span class="cm">// { api: string; method: string }</span>
+
+<span class="cm">// With as const — narrowed to literal types, deeply readonly</span>
+<span class="kw">const</span> config2 = { api: <span class="str">"/users"</span>, method: <span class="str">"GET"</span> } <span class="kw">as const</span>;
+<span class="cm">// { readonly api: "/users"; readonly method: "GET" }</span>
+
+<span class="cm">// Combine satisfies + as const for best of both worlds</span>
+<span class="kw">const</span> routes = {
+  home: <span class="str">"/"</span>,
+  about: <span class="str">"/about"</span>,
+  users: <span class="str">"/users"</span>,
+} <span class="kw">as const</span> <span class="kw">satisfies</span> <span class="tp">Record</span>&lt;<span class="tp">string</span>, <span class="tp">string</span>&gt;;
+<span class="cm">// Validated as Record AND preserves literal types</span></pre>
+
+              <div class="key-points">
+                <h4>Key Takeaways</h4>
+                <ul>
+                  <li>
+                    <code>as Type</code> tells TS to treat a value as a specific
+                    type — use when you know more than TS
+                  </li>
+                  <li>
+                    <code>!</code> (non-null assertion) removes null/undefined —
+                    use sparingly, can hide bugs
+                  </li>
+                  <li>
+                    <code>satisfies</code> validates a type match without
+                    widening — best of both worlds
+                  </li>
+                  <li>
+                    <code>as const</code> freezes values to literal types —
+                    essential for config objects
+                  </li>
+                  <li>
+                    Assertions are compile-time only — they don't change runtime
+                    behavior
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1944,6 +2086,136 @@ _.<span class="fn">chunk</span>([<span class="num">1</span>, <span class="num">2
                   <li>
                     Any file with <code>import</code>/<code>export</code> is a
                     module; without, it's a global script
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.7 Async & Promises -->
+          <div class="topic">
+            <div class="topic-header">
+              <div>
+                <div class="topic-name">Async & Promises</div>
+                <div class="topic-desc">
+                  Promise&lt;T&gt;, async/await, error handling
+                </div>
+              </div>
+              <span class="topic-toggle">▼</span>
+            </div>
+            <div class="topic-content">
+              <h3>Async & Promises</h3>
+              <p>
+                TypeScript adds full type safety to asynchronous code.
+                <code>Promise&lt;T&gt;</code> is a generic type where
+                <code>T</code> is the type of the resolved value.
+              </p>
+
+              <pre><span class="cm">// Promise basics — T is the resolved value type</span>
+<span class="kw">function</span> <span class="fn">fetchUser</span>(id: <span class="tp">number</span>): <span class="tp">Promise</span>&lt;<span class="tp">User</span>&gt; {
+  <span class="kw">return</span> <span class="fn">fetch</span>(<span class="str">`/api/users/${id}`</span>)
+    .<span class="fn">then</span>(res =&gt; res.<span class="fn">json</span>());
+}
+
+<span class="cm">// async/await — return type is always Promise&lt;T&gt;</span>
+<span class="kw">async function</span> <span class="fn">getUser</span>(id: <span class="tp">number</span>): <span class="tp">Promise</span>&lt;<span class="tp">User</span>&gt; {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/api/users/${id}`</span>);
+  <span class="kw">return</span> res.<span class="fn">json</span>();
+}
+
+<span class="cm">// The awaited value is unwrapped — no longer a Promise</span>
+<span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">getUser</span>(<span class="num">1</span>); <span class="cm">// user is User, not Promise&lt;User&gt;</span></pre>
+
+              <p>
+                <strong>Promise combinators</strong> — run multiple async
+                operations with type-safe results:
+              </p>
+              <pre><span class="cm">// Promise.all — waits for all, preserves types in a tuple</span>
+<span class="kw">const</span> [users, posts] = <span class="kw">await</span> Promise.<span class="fn">all</span>([
+  <span class="fn">fetchUsers</span>(),   <span class="cm">// Promise&lt;User[]&gt;</span>
+  <span class="fn">fetchPosts</span>(),   <span class="cm">// Promise&lt;Post[]&gt;</span>
+]);
+<span class="cm">// users: User[], posts: Post[] — types are preserved!</span>
+
+<span class="cm">// Promise.allSettled — never rejects, returns status for each</span>
+<span class="kw">const</span> results = <span class="kw">await</span> Promise.<span class="fn">allSettled</span>([
+  <span class="fn">fetchUsers</span>(),
+  <span class="fn">fetchPosts</span>(),
+]);
+<span class="cm">// Each result is:</span>
+<span class="cm">//   { status: "fulfilled", value: T }</span>
+<span class="cm">//   { status: "rejected",  reason: unknown }</span>
+
+<span class="cm">// Promise.race — resolves/rejects with the first to settle</span>
+<span class="kw">const</span> fastest = <span class="kw">await</span> Promise.<span class="fn">race</span>([
+  <span class="fn">fetchFromCDN</span>(),
+  <span class="fn">fetchFromOrigin</span>(),
+]);</pre>
+
+              <p>
+                <strong>Error handling</strong> in async code:
+              </p>
+              <pre><span class="cm">// catch variable is `unknown` (with useUnknownInCatchVariables)</span>
+<span class="kw">async function</span> <span class="fn">loadData</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchApi</span>&lt;<span class="tp">User</span>[]&gt;(<span class="str">"/users"</span>);
+    <span class="kw">return</span> data;
+  } <span class="kw">catch</span> (error) {
+    <span class="cm">// error is `unknown` — must narrow before using</span>
+    <span class="kw">if</span> (error <span class="kw">instanceof</span> Error) {
+      console.<span class="fn">error</span>(error.message);
+    }
+    <span class="kw">throw</span> error;
+  }
+}
+
+<span class="cm">// Awaited&lt;T&gt; utility type — unwraps Promise types recursively</span>
+<span class="kw">type</span> <span class="tp">A</span> = <span class="tp">Awaited</span>&lt;<span class="tp">Promise</span>&lt;<span class="tp">string</span>&gt;&gt;;             <span class="cm">// string</span>
+<span class="kw">type</span> <span class="tp">B</span> = <span class="tp">Awaited</span>&lt;<span class="tp">Promise</span>&lt;<span class="tp">Promise</span>&lt;<span class="tp">number</span>&gt;&gt;&gt;;    <span class="cm">// number</span>
+<span class="kw">type</span> <span class="tp">C</span> = <span class="tp">Awaited</span>&lt;<span class="tp">boolean</span> | <span class="tp">Promise</span>&lt;<span class="tp">string</span>&gt;&gt;;  <span class="cm">// boolean | string</span></pre>
+
+              <p>
+                <strong>Typing async callbacks and utilities:</strong>
+              </p>
+              <pre><span class="cm">// Typed async function type</span>
+<span class="kw">type</span> <span class="tp">AsyncFn</span>&lt;<span class="tp">T</span>&gt; = () =&gt; <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt;;
+
+<span class="cm">// Retry wrapper with typed return</span>
+<span class="kw">async function</span> <span class="fn">retry</span>&lt;<span class="tp">T</span>&gt;(
+  fn: <span class="tp">AsyncFn</span>&lt;<span class="tp">T</span>&gt;,
+  attempts: <span class="tp">number</span> = <span class="num">3</span>
+): <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt; {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; attempts; i++) {
+    <span class="kw">try</span> { <span class="kw">return await</span> <span class="fn">fn</span>(); }
+    <span class="kw">catch</span> (e) { <span class="kw">if</span> (i === attempts - <span class="num">1</span>) <span class="kw">throw</span> e; }
+  }
+  <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">"Unreachable"</span>);
+}
+
+<span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">retry</span>(() =&gt; <span class="fn">fetchUser</span>(<span class="num">1</span>)); <span class="cm">// user is User</span></pre>
+
+              <div class="key-points">
+                <h4>Key Takeaways</h4>
+                <ul>
+                  <li>
+                    <code>Promise&lt;T&gt;</code> is generic —
+                    <code>T</code> is the type of the resolved value
+                  </li>
+                  <li>
+                    <code>async</code> functions always return a
+                    <code>Promise</code>; <code>await</code> unwraps it
+                  </li>
+                  <li>
+                    <code>Promise.all</code> preserves individual types as a
+                    typed tuple
+                  </li>
+                  <li>
+                    Catch variables are <code>unknown</code> — always narrow
+                    with <code>instanceof</code> before using
+                  </li>
+                  <li>
+                    <code>Awaited&lt;T&gt;</code> recursively unwraps nested
+                    Promise types — useful in utility types
                   </li>
                 </ul>
               </div>
@@ -3102,6 +3374,131 @@ timerRef.current = window.<span class="fn">setTimeout</span>(() =&gt; {}, <span 
                   </li>
                   <li>
                     Single source of truth: one schema, one type, one validation
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4.7 forwardRef & Polymorphic Components -->
+          <div class="topic">
+            <div class="topic-header">
+              <div>
+                <div class="topic-name">forwardRef & polymorphic components</div>
+                <div class="topic-desc">
+                  Ref forwarding, as prop, ComponentProps
+                </div>
+              </div>
+              <span class="topic-toggle">▼</span>
+            </div>
+            <div class="topic-content">
+              <h3>forwardRef & Polymorphic Components</h3>
+              <p>
+                <code>forwardRef</code> lets parent components pass a ref
+                through to a child's DOM element. Typing it correctly
+                requires specifying both the ref type and the props type.
+              </p>
+
+              <pre><span class="cm">// forwardRef — first generic is ref type, second is props</span>
+<span class="kw">import</span> { forwardRef } <span class="kw">from</span> <span class="str">"react"</span>;
+
+<span class="kw">interface</span> <span class="tp">InputProps</span> {
+  label: <span class="tp">string</span>;
+  error?: <span class="tp">string</span>;
+}
+
+<span class="kw">const</span> Input = <span class="fn">forwardRef</span>&lt;<span class="tp">HTMLInputElement</span>, <span class="tp">InputProps</span>&gt;(
+  ({ label, error, ...rest }, ref) =&gt; (
+    &lt;div&gt;
+      &lt;label&gt;{label}&lt;/label&gt;
+      &lt;input ref={ref} {...rest} /&gt;
+      {error &amp;&amp; &lt;span className=<span class="str">"error"</span>&gt;{error}&lt;/span&gt;}
+    &lt;/div&gt;
+  )
+);
+
+<span class="cm">// Usage — ref is properly typed as HTMLInputElement</span>
+<span class="kw">const</span> inputRef = <span class="fn">useRef</span>&lt;<span class="tp">HTMLInputElement</span>&gt;(<span class="kw">null</span>);
+&lt;<span class="fn">Input</span> ref={inputRef} label=<span class="str">"Email"</span> /&gt;;
+inputRef.current?.<span class="fn">focus</span>(); <span class="cm">// fully typed!</span></pre>
+
+              <p>
+                <strong>Polymorphic components</strong> — the <code>as</code>
+                prop pattern lets a component render as different HTML elements
+                while inheriting the correct props:
+              </p>
+              <pre><span class="cm">// Polymorphic "as" prop type helper</span>
+<span class="kw">type</span> <span class="tp">AsProp</span>&lt;<span class="tp">C</span> <span class="kw">extends</span> <span class="tp">React.ElementType</span>&gt; = {
+  as?: <span class="tp">C</span>;
+};
+
+<span class="kw">type</span> <span class="tp">PolyProps</span>&lt;
+  <span class="tp">C</span> <span class="kw">extends</span> <span class="tp">React.ElementType</span>,
+  <span class="tp">Props</span> = {}
+&gt; = <span class="tp">Props</span> &amp; <span class="tp">AsProp</span>&lt;<span class="tp">C</span>&gt; &amp;
+  <span class="tp">Omit</span>&lt;<span class="tp">React.ComponentPropsWithoutRef</span>&lt;<span class="tp">C</span>&gt;, <span class="kw">keyof</span> (<span class="tp">AsProp</span>&lt;<span class="tp">C</span>&gt; &amp; <span class="tp">Props</span>)&gt;;
+
+<span class="cm">// A Text component that can render as any element</span>
+<span class="kw">type</span> <span class="tp">TextOwnProps</span> = { size?: <span class="str">"sm"</span> | <span class="str">"md"</span> | <span class="str">"lg"</span>; bold?: <span class="tp">boolean</span> };
+
+<span class="kw">function</span> <span class="fn">Text</span>&lt;<span class="tp">C</span> <span class="kw">extends</span> <span class="tp">React.ElementType</span> = <span class="str">"span"</span>&gt;({
+  as, size = <span class="str">"md"</span>, bold, children, ...rest
+}: <span class="tp">PolyProps</span>&lt;<span class="tp">C</span>, <span class="tp">TextOwnProps</span>&gt;) {
+  <span class="kw">const</span> Component = as || <span class="str">"span"</span>;
+  <span class="kw">return</span> &lt;Component {...rest}&gt;{children}&lt;/Component&gt;;
+}
+
+<span class="cm">// Usage — each renders correctly with proper prop types</span>
+&lt;<span class="fn">Text</span>&gt;Default span&lt;/<span class="fn">Text</span>&gt;
+&lt;<span class="fn">Text</span> as=<span class="str">"h1"</span>&gt;Renders as h1&lt;/<span class="fn">Text</span>&gt;
+&lt;<span class="fn">Text</span> as=<span class="str">"a"</span> href=<span class="str">"/about"</span>&gt;Link&lt;/<span class="fn">Text</span>&gt; <span class="cm">// href is typed!</span>
+<span class="cm">// &lt;Text as="a" href={123} /&gt;   // Error! href must be string</span></pre>
+
+              <p>
+                <strong>ComponentProps helpers</strong> — extract props from
+                native elements or components:
+              </p>
+              <pre><span class="cm">// Get all props of a native element including ref</span>
+<span class="kw">type</span> <span class="tp">ButtonProps</span> = <span class="tp">React.ComponentPropsWithRef</span>&lt;<span class="str">"button"</span>&gt; &amp; {
+  variant: <span class="str">"primary"</span> | <span class="str">"ghost"</span>;
+};
+
+<span class="cm">// Get all props without ref</span>
+<span class="kw">type</span> <span class="tp">DivProps</span> = <span class="tp">React.ComponentPropsWithoutRef</span>&lt;<span class="str">"div"</span>&gt; &amp; {
+  padding?: <span class="tp">number</span>;
+};
+
+<span class="cm">// Extract props from any custom component</span>
+<span class="kw">type</span> <span class="tp">MyBtnProps</span> = <span class="tp">React.ComponentProps</span>&lt;<span class="kw">typeof</span> Button&gt;;
+
+<span class="cm">// Useful for wrapper components that pass all props through</span>
+<span class="kw">function</span> <span class="fn">Card</span>({ className, ...rest }: <span class="tp">React.ComponentPropsWithoutRef</span>&lt;<span class="str">"div"</span>&gt;) {
+  <span class="kw">return</span> &lt;div className={<span class="str">`card ${className}`</span>} {...rest} /&gt;;
+}</pre>
+
+              <div class="key-points">
+                <h4>Key Takeaways</h4>
+                <ul>
+                  <li>
+                    <code>forwardRef&lt;Element, Props&gt;</code> — first
+                    generic is the ref type, second is props
+                  </li>
+                  <li>
+                    Polymorphic <code>as</code> prop lets one component render
+                    as different elements with correct prop types
+                  </li>
+                  <li>
+                    <code>ComponentPropsWithRef</code> /
+                    <code>WithoutRef</code> extract all props from native
+                    HTML elements
+                  </li>
+                  <li>
+                    <code>React.ComponentProps&lt;typeof X&gt;</code> extracts
+                    props from any custom component
+                  </li>
+                  <li>
+                    Prefer <code>ComponentPropsWithoutRef</code> unless you
+                    specifically need ref forwarding
                   </li>
                 </ul>
               </div>
@@ -4286,6 +4683,135 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
               </div>
             </div>
           </div>
+
+          <!-- 6.7 Testing TypeScript -->
+          <div class="topic">
+            <div class="topic-header">
+              <div>
+                <div class="topic-name">Testing TypeScript</div>
+                <div class="topic-desc">
+                  Vitest/Jest setup, typed mocks, type testing
+                </div>
+              </div>
+              <span class="topic-toggle">▼</span>
+            </div>
+            <div class="topic-content">
+              <h3>Testing TypeScript Code</h3>
+              <p>
+                Modern TypeScript testing uses <strong>Vitest</strong> (or Jest)
+                with full type support. Types flow through your test setup,
+                mocks, assertions, and utilities — catching bugs before they
+                reach production.
+              </p>
+
+              <pre><span class="cm">// Vitest with TypeScript — zero config, native TS support</span>
+<span class="kw">import</span> { describe, it, expect, vi } <span class="kw">from</span> <span class="str">"vitest"</span>;
+<span class="kw">import</span> { <span class="fn">formatCurrency</span> } <span class="kw">from</span> <span class="str">"./utils"</span>;
+
+<span class="fn">describe</span>(<span class="str">"formatCurrency"</span>, () =&gt; {
+  <span class="fn">it</span>(<span class="str">"formats dollars correctly"</span>, () =&gt; {
+    <span class="fn">expect</span>(<span class="fn">formatCurrency</span>(<span class="num">9.99</span>, <span class="str">"USD"</span>)).<span class="fn">toBe</span>(<span class="str">"$9.99"</span>);
+  });
+
+  <span class="fn">it</span>(<span class="str">"handles zero"</span>, () =&gt; {
+    <span class="fn">expect</span>(<span class="fn">formatCurrency</span>(<span class="num">0</span>, <span class="str">"USD"</span>)).<span class="fn">toBe</span>(<span class="str">"$0.00"</span>);
+  });
+});</pre>
+
+              <p>
+                <strong>Typed mocks</strong> — <code>vi.fn()</code> preserves
+                function signatures:
+              </p>
+              <pre><span class="kw">import</span> { vi } <span class="kw">from</span> <span class="str">"vitest"</span>;
+
+<span class="kw">interface</span> <span class="tp">UserService</span> {
+  <span class="fn">getUser</span>(id: <span class="tp">number</span>): <span class="tp">Promise</span>&lt;<span class="tp">User</span>&gt;;
+  <span class="fn">createUser</span>(data: <span class="tp">CreateUserDTO</span>): <span class="tp">Promise</span>&lt;<span class="tp">User</span>&gt;;
+}
+
+<span class="cm">// Type-safe mock — must match the interface exactly</span>
+<span class="kw">const</span> mockService: <span class="tp">UserService</span> = {
+  getUser: vi.<span class="fn">fn</span>().<span class="fn">mockResolvedValue</span>({
+    id: <span class="num">1</span>, name: <span class="str">"Alice"</span>, email: <span class="str">"a@b.c"</span>
+  }),
+  createUser: vi.<span class="fn">fn</span>().<span class="fn">mockResolvedValue</span>({
+    id: <span class="num">2</span>, name: <span class="str">"Bob"</span>, email: <span class="str">"b@c.d"</span>
+  }),
+};
+
+<span class="cm">// vi.spyOn preserves the original function type</span>
+<span class="kw">const</span> spy = vi.<span class="fn">spyOn</span>(userService, <span class="str">"getUser"</span>);
+<span class="cm">// spy is typed: SpyInstance&lt;[id: number], Promise&lt;User&gt;&gt;</span></pre>
+
+              <p>
+                <strong>Testing React components</strong> with Testing Library:
+              </p>
+              <pre><span class="kw">import</span> { render, screen } <span class="kw">from</span> <span class="str">"@testing-library/react"</span>;
+<span class="kw">import</span> userEvent <span class="kw">from</span> <span class="str">"@testing-library/user-event"</span>;
+
+<span class="fn">it</span>(<span class="str">"submits the form with valid data"</span>, <span class="kw">async</span> () =&gt; {
+  <span class="kw">const</span> onSubmit = vi.<span class="fn">fn</span>();
+  <span class="fn">render</span>(&lt;<span class="fn">ContactForm</span> onSubmit={onSubmit} /&gt;);
+
+  <span class="kw">await</span> userEvent.<span class="fn">type</span>(
+    screen.<span class="fn">getByLabelText</span>(<span class="str">"Name"</span>), <span class="str">"Alice"</span>
+  );
+  <span class="kw">await</span> userEvent.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">"button"</span>));
+
+  <span class="fn">expect</span>(onSubmit).<span class="fn">toHaveBeenCalledWith</span>(
+    <span class="fn">expect</span>.<span class="fn">objectContaining</span>({ name: <span class="str">"Alice"</span> })
+  );
+});</pre>
+
+              <p>
+                <strong>Type-level testing</strong> — verify your types are
+                correct at compile time:
+              </p>
+              <pre><span class="kw">import</span> { expectTypeOf } <span class="kw">from</span> <span class="str">"vitest"</span>;
+
+<span class="fn">it</span>(<span class="str">"returns the correct type"</span>, () =&gt; {
+  <span class="cm">// Assert return type</span>
+  <span class="fn">expectTypeOf</span>(<span class="fn">getUser</span>).<span class="fn">returns</span>.<span class="fn">resolves</span>.<span class="fn">toEqualTypeOf</span>&lt;<span class="tp">User</span>&gt;();
+
+  <span class="cm">// Assert parameter type</span>
+  <span class="fn">expectTypeOf</span>(<span class="fn">formatDate</span>).<span class="fn">parameter</span>(<span class="num">0</span>).<span class="fn">toBeString</span>();
+
+  <span class="cm">// Assert a type matches an expected shape</span>
+  <span class="fn">expectTypeOf</span>&lt;<span class="tp">User</span>&gt;().<span class="fn">toHaveProperty</span>(<span class="str">"name"</span>);
+  <span class="fn">expectTypeOf</span>&lt;<span class="tp">User</span>&gt;().<span class="fn">not</span>.<span class="fn">toBeAny</span>();
+});
+
+<span class="cm">// Test that a type error occurs (should NOT compile)</span>
+<span class="cm">// @ts-expect-error — passes if the next line has a type error</span>
+<span class="kw">const</span> invalid: <span class="tp">User</span> = { name: <span class="num">123</span> };</pre>
+
+              <div class="key-points">
+                <h4>Key Takeaways</h4>
+                <ul>
+                  <li>
+                    Vitest has native TypeScript support with zero extra
+                    configuration
+                  </li>
+                  <li>
+                    Mock objects typed with interfaces ensure mocks match
+                    real implementations
+                  </li>
+                  <li>
+                    <code>vi.spyOn</code> preserves original function types for
+                    type-safe spy assertions
+                  </li>
+                  <li>
+                    <code>expectTypeOf</code> in Vitest lets you write tests
+                    that verify types at compile time
+                  </li>
+                  <li>
+                    Use <code>@ts-expect-error</code> to assert that certain
+                    code correctly produces type errors
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -4306,6 +4832,30 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
             } while (el !== null && el.nodeType === 1);
             return null;
           };
+        }
+
+        // Wrap phase-body children in .phase-body-inner for grid animation
+        var phaseBodies = document.querySelectorAll(".phase-body");
+        for (var p = 0; p < phaseBodies.length; p++) {
+          var pb = phaseBodies[p];
+          var pbInner = document.createElement("div");
+          pbInner.className = "phase-body-inner";
+          while (pb.firstChild) {
+            pbInner.appendChild(pb.firstChild);
+          }
+          pb.appendChild(pbInner);
+        }
+
+        // Wrap topic-content children in .topic-content-inner for grid animation
+        var topicContents = document.querySelectorAll(".topic-content");
+        for (var t = 0; t < topicContents.length; t++) {
+          var tc = topicContents[t];
+          var tcInner = document.createElement("div");
+          tcInner.className = "topic-content-inner";
+          while (tc.firstChild) {
+            tcInner.appendChild(tc.firstChild);
+          }
+          tc.appendChild(tcInner);
         }
 
         function handleClick(e) {
@@ -4330,7 +4880,7 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
           var topic = target.closest ? target.closest(".topic") : null;
           if (topic) {
             var wasActive = topic.classList.contains("active");
-            var phase = topic.closest(".phase-body");
+            var phase = topic.closest(".phase-body-inner") || topic.closest(".phase-body");
             if (phase) {
               var activeTopics = phase.querySelectorAll(".topic.active");
               for (var i = 0; i < activeTopics.length; i++) {
@@ -4341,7 +4891,7 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
               topic.classList.add("active");
               setTimeout(function () {
                 topic.scrollIntoView({ behavior: "smooth", block: "nearest" });
-              }, 50);
+              }, 200);
             }
           }
         }
