@@ -320,8 +320,9 @@
       .topic-content {
         display: grid;
         grid-template-rows: 0fr;
-        transition: grid-template-rows 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                    margin-top 0.35s ease;
+        transition:
+          grid-template-rows 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+          margin-top 0.35s ease;
         margin-top: 0;
         min-width: 0;
       }
@@ -1405,8 +1406,8 @@ map.<span class="fn">set</span>(<span class="str">"count"</span>, <span class="n
 <span class="cm">// ⚠️ Use sparingly — if you're wrong, you get a runtime error</span></pre>
 
               <p>
-                <strong>The <code>satisfies</code> operator</strong> (TS 4.9+)
-                — validates a value matches a type without widening it:
+                <strong>The <code>satisfies</code> operator</strong> (TS 4.9+) —
+                validates a value matches a type without widening it:
               </p>
               <pre><span class="kw">type</span> <span class="tp">Color</span> = <span class="str">"red"</span> | <span class="str">"green"</span> | <span class="str">"blue"</span>;
 <span class="kw">type</span> <span class="tp">Theme</span> = <span class="tp">Record</span>&lt;<span class="tp">string</span>, <span class="tp">Color</span> | <span class="tp">Color</span>[]&gt;;
@@ -2152,9 +2153,7 @@ _.<span class="fn">chunk</span>([<span class="num">1</span>, <span class="num">2
   <span class="fn">fetchFromOrigin</span>(),
 ]);</pre>
 
-              <p>
-                <strong>Error handling</strong> in async code:
-              </p>
+              <p><strong>Error handling</strong> in async code:</p>
               <pre><span class="cm">// catch variable is `unknown` (with useUnknownInCatchVariables)</span>
 <span class="kw">async function</span> <span class="fn">loadData</span>() {
   <span class="kw">try</span> {
@@ -2198,8 +2197,8 @@ _.<span class="fn">chunk</span>([<span class="num">1</span>, <span class="num">2
                 <h4>Key Takeaways</h4>
                 <ul>
                   <li>
-                    <code>Promise&lt;T&gt;</code> is generic —
-                    <code>T</code> is the type of the resolved value
+                    <code>Promise&lt;T&gt;</code> is generic — <code>T</code> is
+                    the type of the resolved value
                   </li>
                   <li>
                     <code>async</code> functions always return a
@@ -3384,7 +3383,9 @@ timerRef.current = window.<span class="fn">setTimeout</span>(() =&gt; {}, <span 
           <div class="topic">
             <div class="topic-header">
               <div>
-                <div class="topic-name">forwardRef & polymorphic components</div>
+                <div class="topic-name">
+                  forwardRef & polymorphic components
+                </div>
                 <div class="topic-desc">
                   Ref forwarding, as prop, ComponentProps
                 </div>
@@ -3395,8 +3396,8 @@ timerRef.current = window.<span class="fn">setTimeout</span>(() =&gt; {}, <span 
               <h3>forwardRef & Polymorphic Components</h3>
               <p>
                 <code>forwardRef</code> lets parent components pass a ref
-                through to a child's DOM element. Typing it correctly
-                requires specifying both the ref type and the props type.
+                through to a child's DOM element. Typing it correctly requires
+                specifying both the ref type and the props type.
               </p>
 
               <pre><span class="cm">// forwardRef — first generic is ref type, second is props</span>
@@ -3489,8 +3490,8 @@ inputRef.current?.<span class="fn">focus</span>(); <span class="cm">// fully typ
                   </li>
                   <li>
                     <code>ComponentPropsWithRef</code> /
-                    <code>WithoutRef</code> extract all props from native
-                    HTML elements
+                    <code>WithoutRef</code> extract all props from native HTML
+                    elements
                   </li>
                   <li>
                     <code>React.ComponentProps&lt;typeof X&gt;</code> extracts
@@ -4793,8 +4794,8 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
                     configuration
                   </li>
                   <li>
-                    Mock objects typed with interfaces ensure mocks match
-                    real implementations
+                    Mock objects typed with interfaces ensure mocks match real
+                    implementations
                   </li>
                   <li>
                     <code>vi.spyOn</code> preserves original function types for
@@ -4880,7 +4881,9 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
           var topic = target.closest ? target.closest(".topic") : null;
           if (topic) {
             var wasActive = topic.classList.contains("active");
-            var phase = topic.closest(".phase-body-inner") || topic.closest(".phase-body");
+            var phase =
+              topic.closest(".phase-body-inner") ||
+              topic.closest(".phase-body");
             if (phase) {
               var activeTopics = phase.querySelectorAll(".topic.active");
               for (var i = 0; i < activeTopics.length; i++) {
@@ -4897,19 +4900,6 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
         }
 
         document.addEventListener("click", handleClick, false);
-        document.addEventListener(
-          "touchend",
-          function (e) {
-            if (
-              e.target.closest &&
-              (e.target.closest(".phase-header") || e.target.closest(".topic"))
-            ) {
-              e.preventDefault();
-              handleClick(e);
-            }
-          },
-          false,
-        );
 
         var themeToggle = document.getElementById("themeToggle");
         if (themeToggle) {
