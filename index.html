@@ -61,7 +61,7 @@
 
       /* ── Base ── */
       .roadmap {
-        padding: 28px 20px;
+        padding: 0px 20px 28px;
         min-height: 100vh;
         box-sizing: border-box;
         font-family:
@@ -88,8 +88,12 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        padding: 0 22px 12px;
+        padding: 24px 22px 24px;
         gap: 10px;
+        position: sticky;
+        top: 0;
+        background-color: var(--rm-bg);
+        z-index: 9999;
       }
       .theme-label {
         font-size: 13px;
@@ -154,6 +158,41 @@
       }
       .theme-switch input:checked + .theme-slider::after {
         transform: translateX(24px);
+      }
+
+      /* ── Language Toggle ── */
+      .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        border: 1px solid var(--rm-border);
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--rm-bg-tertiary);
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+        flex-shrink: 0;
+        margin-right: auto;
+      }
+      .lang-btn {
+        padding: 4px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: var(--rm-text-tertiary);
+        cursor: pointer;
+        line-height: 1.4;
+        font-family: inherit;
+      }
+      .lang-btn.active {
+        background: var(--rm-text);
+        color: var(--rm-bg);
+        border-radius: 20px;
+      }
+      .lang-btn:not(.active):hover {
+        color: var(--rm-text);
       }
 
       /* ── Phase Card ── */
@@ -509,7 +548,7 @@
       /* ═══════════════════════════════════════ */
       @media (max-width: 768px) {
         .roadmap {
-          padding: 16px 0;
+          padding: 0 0;
           border-radius: 0;
         }
 
@@ -600,7 +639,12 @@
         }
 
         .theme-bar {
-          padding: 0 16px 10px;
+          padding: 26px 16px 26px;
+        }
+
+        .lang-btn {
+          font-size: 12px;
+          padding: 3px 10px;
         }
       }
 
@@ -609,7 +653,7 @@
       /* ═══════════════════════════════════════ */
       @media (max-width: 480px) {
         .roadmap {
-          padding: 10px 0;
+          padding: 0 0;
         }
 
         .phase {
@@ -739,7 +783,12 @@
         }
 
         .theme-bar {
-          padding: 0 14px 8px;
+          padding: 8px 14px 8px;
+        }
+
+        .lang-btn {
+          font-size: 11px;
+          padding: 3px 8px;
         }
 
         .theme-label {
@@ -769,7 +818,11 @@
   <body>
     <div class="roadmap dark" id="roadmap">
       <div class="theme-bar">
-        <span class="theme-label">Theme</span>
+        <div class="lang-toggle" id="langToggle">
+          <button class="lang-btn active" data-lang="en">EN</button
+          ><button class="lang-btn" data-lang="uz">UZ</button>
+        </div>
+        <span class="theme-label" id="themeLabel">Theme</span>
         <label class="theme-switch" title="Toggle dark mode">
           <input type="checkbox" id="themeToggle" checked />
           <span class="theme-slider">
@@ -4881,20 +4934,10 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
           var topic = target.closest ? target.closest(".topic") : null;
           if (topic) {
             var wasActive = topic.classList.contains("active");
-            var phase =
-              topic.closest(".phase-body-inner") ||
-              topic.closest(".phase-body");
-            if (phase) {
-              var activeTopics = phase.querySelectorAll(".topic.active");
-              for (var i = 0; i < activeTopics.length; i++) {
-                activeTopics[i].classList.remove("active");
-              }
-            }
-            if (!wasActive) {
+            if (wasActive) {
+              topic.classList.remove("active");
+            } else {
               topic.classList.add("active");
-              setTimeout(function () {
-                topic.scrollIntoView({ behavior: "smooth", block: "nearest" });
-              }, 200);
             }
           }
         }
@@ -4932,6 +4975,600 @@ bus.<span class="fn">emit</span>(<span class="str">"error"</span>, { message: <s
             document.getElementById("roadmap").classList.remove("dark");
             if (themeToggle) themeToggle.checked = false;
             document.body.classList.add("light-mode");
+          }
+        } catch (ex) {}
+
+        /* ════════════════════════════════════════════════════════════ */
+        /* ── UZ / EN  Language Toggle ──                              */
+        /* ════════════════════════════════════════════════════════════ */
+        var currentLang = "en";
+        var enCache = {};
+
+        var uz = {
+          pageTitle: "TypeScript O'rganish Yo'l Xaritasi",
+          themeLabel: "Mavzu",
+
+          phaseTitles: [
+            "Asos — Asosiy TS",
+            "O'rta daraja — Generiklar va Toraytirish",
+            "Ilg'or — Tip tizimi ustunligi",
+            "TypeScript + React",
+            "TypeScript + Next.js",
+            "Ishlab chiqarish naqshlari",
+          ],
+
+          phaseTags: [
+            "1–2 hafta",
+            "3–4 hafta",
+            "5–6 hafta",
+            "7-hafta",
+            "8–9 hafta",
+            "10-hafta",
+          ],
+
+          topicNames: [
+            "Asosiy tiplar",
+            "Tip xulosasi",
+            "Interfeyslar va tip taxalluslari",
+            "Birlashma va literal tiplar",
+            "Funksiyalarni tiplash",
+            "Massivlar, kortejlar va enumlar",
+            "Tip tasdiqlari",
+            "Generiklar",
+            "Tipni toraytirish",
+            "Yordamchi tiplar",
+            "Tip himoyachilari",
+            "TS da klasslar",
+            "Modullar va deklaratsiyalar",
+            "Asinxron va Promise'lar",
+            "Mapped va shartli tiplar",
+            "Shablon literal tiplari",
+            "keyof, typeof va indekslangan tiplar",
+            "Varianslik va tip muvofiqligi",
+            "tsconfig chuqur tahlil",
+            "Dekoratorlar",
+            "Komponentlarni tiplash",
+            "Hook'larni tiplash",
+            "Hodisa tiplari",
+            "Generik komponentlar",
+            "Context API ni tiplash",
+            "Zod + forma tekshiruvi",
+            "forwardRef va polimorfik komponentlar",
+            "App Router tiplari",
+            "Server va client komponentlar",
+            "Route handler'lar va API",
+            "Server Action'lar",
+            "Ma'lumotlarni olish naqshlari",
+            "Middleware tiplash",
+            "Boshdan-oxirigacha API tiplash",
+            "Prisma + TypeScript",
+            "TanStack Query",
+            "Xatolarni boshqarish naqshlari",
+            "ESLint + TS qoidalari",
+            "Ilg'or naqshlar",
+            "TypeScript'ni testlash",
+          ],
+
+          topicDescs: [
+            "string, number, boolean, null, undefined, any, unknown",
+            "TS qachon xulosa chiqaradi va qachon siz yozishingiz kerak",
+            "interface va type, ixtiyoriy maydonlar, readonly",
+            'string | number, A & B, "left" | "right"',
+            "Parametrlar, qaytish tiplari, void, overload'lar",
+            "T[], [string, number], const enum'lar",
+            "as kalit so'zi, non-null !, satisfies operatori",
+            "Generik funksiyalar, interfeyslar, cheklovlar",
+            "typeof, instanceof, in, farqlanuvchi birlashmalar",
+            "Partial, Pick, Omit, Record, ReturnType",
+            "Maxsus predikatlar: x is SomeType",
+            "public/private/protected, abstract, implements",
+            "ES modullar, .d.ts fayllar, @types paketlar",
+            "Promise&lt;T&gt;, async/await, xatolarni boshqarish",
+            "{ [K in keyof T]: ... }, T extends U ? X : Y",
+            "`${string}Event`, conditionals'da infer",
+            "T[K], keyof T, typeof o'zgaruvchi",
+            "Strukturaviy tiplash, kovarianslik, kontravarianslik",
+            "strict, paths, target, moduleResolution",
+            "Klass, metod, parametr dekoratorlari",
+            "Props interfeyslari, children, React.FC va funksiya",
+            "useState, useRef, useReducer, maxsus hook'lar",
+            "MouseEvent, ChangeEvent, FormEvent",
+            "Tip parametrlari bilan qayta foydalaniladigan komponentlar",
+            "createContext, provider'lar, useContext",
+            "Runtime tekshiruv, sxema xulosasi",
+            "Ref yo'naltirish, as prop, ComponentProps",
+            "page.tsx, layout.tsx, params, searchParams",
+            'async komponentlar, "use client" tiplash',
+            "NextRequest, NextResponse, tiplangan handler'lar",
+            "Forma action'lari, useFormState, useFormStatus",
+            "fetch tiplari, kesh opsiyalari, tiplangan javoblar",
+            "NextMiddleware, matcher konfiguratsiyasi, cookie'lar",
+            "API javoblarini backend'dan UI'ga tiplash",
+            "Generatsiya qilingan tiplar, tiplangan so'rovlar, munosabatlar",
+            "useQuery, useMutation tip xavfsizligi bilan",
+            "Result&lt;T,E&gt;, maxsus xatolar, to'liq tekshiruvlar",
+            "@typescript-eslint, qat'iy lint konfiguratsiyasi",
+            "Branded tiplar, builder'lar, tip-xavfsiz hodisalar",
+            "Vitest/Jest sozlash, tiplangan mock'lar, tip testlash",
+          ],
+
+          h3s: [
+            "TypeScript asosiy tiplari",
+            "Tip xulosasi",
+            "Interfeyslar va tip taxalluslari",
+            "Birlashma va literal tiplar",
+            "Funksiyalarni tiplash",
+            "Massivlar, kortejlar va enumlar",
+            "Tip tasdiqlari",
+            "Generiklar",
+            "Tipni toraytirish",
+            "Yordamchi tiplar",
+            "Tip himoyachilari",
+            "TypeScript'da klasslar",
+            "Modullar va deklaratsiya fayllari",
+            "Asinxron va Promise'lar",
+            "Mapped va shartli tiplar",
+            "Shablon literal tiplari va infer",
+            "keyof, typeof va indekslangan kirish tiplari",
+            "Varianslik va tip muvofiqligi",
+            "tsconfig.json chuqur tahlil",
+            "Dekoratorlar",
+            "React komponentlarini tiplash",
+            "React Hook'larini tiplash",
+            "React hodisa tiplari",
+            "Generik React komponentlari",
+            "Context API ni tiplash",
+            "Zod + forma tekshiruvi",
+            "forwardRef va polimorfik komponentlar",
+            "Next.js App Router tiplari",
+            "Server va Client komponentlar",
+            "Route Handler'lar va API yo'llari",
+            "Server Action'lar",
+            "Ma'lumotlarni olish naqshlari",
+            "Middleware tiplash",
+            "Boshdan-oxirigacha API tiplash",
+            "Prisma + TypeScript",
+            "TanStack Query + TypeScript",
+            "Xatolarni boshqarish naqshlari",
+            "ESLint + TypeScript qoidalari",
+            "Ilg'or TypeScript naqshlari",
+            "TypeScript kodini testlash",
+          ],
+
+          keyPointsTitle: "Asosiy xulosalar",
+
+          paragraphs: [
+            "TypeScript JavaScript ustiga tip qatlamini qo'shadi. Har bir qiymatning tipi bor va TypeScript kodingiz ishga tushishidan oldin — kompilyatsiya vaqtida qiymatlarni to'g'ri ishlatayotganingizni tekshiradi, xatolarni oldindan ushlaydi.",
+            "<strong>Primitiv tiplar</strong> asosiy qurilish bloklaridir. O'zgaruvchilarni ikki nuqta va tipdan keyin yozasiz:",
+            "<strong>any va unknown</strong> — Ikkalasi ham istalgan qiymatni saqlaydi, lekin <code>unknown</code> xavfsiz versiya. <code>any</code> bilan TypeScript tekshirishni butunlay to'xtatadi. <code>unknown</code> bilan ishlatishdan oldin tipni toraytirishingiz kerak:",
+            "<strong>void va never</strong> — <code>void</code> funksiya qiymat qaytarmasligini bildiradi. <code>never</code> hech qachon sodir bo'lmaydigan narsani bildiradi:",
+            "TypeScript aqlli — siz tayinlagan qiymat asosida tiplarni avtomatik aniqlaydi. Hamma narsani izohlamasligingiz mumkin. Bu <strong>tip xulosasi</strong> deb ataladi.",
+            "<strong>Qachon aniq izohlamoq kerak?</strong> Tiplarni qo'lda qo'shish yaxshiroq bo'lgan muhim holatlar bor:",
+            "<strong>Kontekstli tiplash</strong> — TypeScript callback'lar kabi kontekstdan tiplarni xulosa qiladi:",
+            "<code>interface</code> ham <code>type</code> ham ob'ektning shaklini aniqlashga imkon beradi. Ular o'xshash, lekin bir necha muhim farqlari bor.",
+            "<strong>Ixtiyoriy va faqat o'qish maydonlari:</strong>",
+            "<strong>Kengaytirish / kompozitsiya:</strong>",
+            "<strong>Qaysi birini ishlatish kerak?</strong> Ob'ekt shakllari uchun <code>interface</code> ishlating (ayniqsa umumiy API va kutubxonalar — ular deklaratsiya birlashtirishni qo'llab-quvvatlaydi). Birlashmalar, kesishmalar, mapped tiplar yoki ob'ekt bo'lmagan tiplar kerak bo'lganda <code>type</code> ishlating:",
+            "<strong>Birlashma tiplar</strong> <code>|</code> operatori yordamida qiymatning bir necha tipdan biri bo'lishiga imkon beradi. Bu TypeScript'ning eng kuchli xususiyatlaridan biri.",
+            "<strong>Literal tiplar</strong> qiymatni aniq belgilangan qiymatlarga cheklaydi:",
+            "<strong>Kesishma tiplar</strong> <code>&amp;</code> yordamida bir nechta tipni bittaga birlashtiradi:",
+            "<strong>Farqlanuvchi birlashmalar</strong> — eng foydali naqsh. Tiplarni ajratish uchun umumiy literal maydon qo'shing:",
+            "Funksiyalar har qanday dasturning asosi. TypeScript parametrlarni, qaytish qiymatlarini tiplash va hatto bir nechta signaturalarni aniqlash imkonini beradi.",
+            "<strong>Funksiya tip ifodalari</strong> — funksiya shaklini tip sifatida aniqlang:",
+            "<strong>Rest parametrlar va overload'lar:</strong>",
+            "<strong>Massivlar</strong> ikki usulda tiplanishi mumkin. Ikkalasi ham teng:",
+            "<strong>Kortejlar</strong> har bir pozitsiyada ma'lum tipga ega belgilangan uzunlikdagi massivlardir:",
+            "<strong>Enum'lar</strong> nomlangan konstantalar to'plamini aniqlaydi. Ko'p hollarda <code>const enum</code> yoki literal birlashmalarni afzal ko'ring:",
+            "<strong>as const</strong> — qiymatlarni literal tiplariga muzlatadi:",
+            "Ba'zan siz qiymat tipi haqida TypeScript'dan ko'proq bilasiz. <strong>Tip tasdiqlari</strong> TS ga qiymatni ma'lum tip sifatida ko'rishni aytish imkonini beradi. Ular runtimeda qiymatni o'zgartirmaydi — faqat tip tekshiruviga ta'sir qiladi.",
+            "<strong>Non-null tasdiq (<code>!</code>)</strong> — TS ga qiymat aniq null yoki undefined emasligini aytadi:",
+            "<strong><code>satisfies</code> operatori</strong> (TS 4.9+) — qiymatning tipga mosligini kengaytirmasdan tekshiradi:",
+            "<strong>const tasdiqlari</strong> — qiymatlarni eng tor literal tiplariga muzlatadi:",
+            "Generiklar tip xavfsizligini saqlagan holda <em>istalgan</em> tip bilan ishlaydigan qayta foydalaniladigan kod yozish imkonini beradi. Ularni tip parametrlari deb tasavvur qiling — ishlatilganda to'ldiriladigan joy egalari.",
+            "<strong>Generik cheklovlar</strong> qaysi tiplar ishlatilishi mumkinligini cheklaydi:",
+            "<strong>Generik interfeyslar va tiplar:</strong>",
+            "Birlashma tipingiz bo'lganda, TypeScript tipga xos xususiyatlardan foydalanishdan oldin uni <strong>toraytirish</strong>ingizni talab qiladi. TS bu tekshiruvlarni boshqaruv oqimi tahlili orqali kuzatadi.",
+            "<strong><code>in</code> operatori</strong> ob'ektda xususiyat mavjudligini tekshiradi:",
+            "<strong>Farqlanuvchi birlashmalar</strong> — eng ishonchli toraytirish naqshi:",
+            "<strong>Haqiqiylik tekshiruvi</strong> null/undefined ni yo'q qiladi:",
+            "TypeScript mavjud tiplarni o'zgartiradigan o'rnatilgan yordamchi tiplarni taqdim etadi. Bular siz har kuni ishlatadigan muhim vositalar.",
+            "<strong>Record, Readonly va boshqalar:</strong>",
+            "<strong>Amaliy misol</strong> — yordamchi tiplarni birlashtirish:",
+            'Tip himoyachilari — TypeScript\'ga "agar bu true qaytarsa, qiymat aniq shu tipda" deb aytadigan funksiyalar. Ular <code>x is Type</code> qaytish sintaksisidan foydalanadi.',
+            "<strong>Amaliy misol</strong> — API javoblarini tekshirish:",
+            "<strong>Tasdiq funksiyalari</strong> (asserts kalit so'zi) shart bajarilmasa, boolean qaytarish o'rniga xato tashlaydi:",
+            "TypeScript JavaScript klasslariga kirish modifikatorlari, abstrakt klasslar va interfeys amalga oshirishni qo'shadi.",
+            "<strong>implements</strong> — klass interfeysga mosligini kafolatlaydi:",
+            "<strong>Abstrakt klasslar</strong> — to'g'ridan-to'g'ri yaratib bo'lmaydigan bazaviy klasslar:",
+            "TypeScript kodni tashkil qilish uchun ES modullardan (<code>import</code>/<code>export</code>) foydalanadi. Yuqori darajadagi <code>import</code> yoki <code>export</code> mavjud bo'lgan har qanday fayl modul sifatida ko'riladi.",
+            "<strong>Deklaratsiya fayllari (.d.ts)</strong> TypeScript tiplari o'rnatilmagan JavaScript kodi uchun tiplarni tavsiflaydi:",
+            "<strong>@types paketlari</strong> — DefinitelyTyped hamjamiyati mashhur JS kutubxonalari uchun tiplarni taqdim etadi:",
+            "TypeScript asinxron kodga to'liq tip xavfsizligini qo'shadi. <code>Promise&lt;T&gt;</code> generik tip bo'lib, <code>T</code> hal qilingan qiymatning tipidir.",
+            "<strong>Promise kombinator'lari</strong> — bir nechta asinxron operatsiyalarni tip-xavfsiz natijalar bilan bajaring:",
+            "<strong>Xatolarni boshqarish</strong> asinxron kodda:",
+            "<strong>Asinxron callback va yordamchi dasturlarni tiplash:</strong>",
+            "<strong>Mapped tiplar</strong> tipdagi har bir xususiyatni o'zgartirish imkonini beradi. Ular <code>in keyof</code> yordamida kalitlar bo'ylab takrorlanadi — har bir xususiyatga qo'llaniladigan <code>for...in</code> siklining tip darajasidagi versiyasi.",
+            '<strong>Shartli tiplar</strong> <code>extends</code> dan tip darajasidagi "if" sifatida foydalanib, shart asosida tipni tanlaydi:',
+            "<strong>Kalit modifikatorini qayta xaritalash</strong> <code>as</code> bilan (TS 4.1+):",
+            "TypeScript shablon literal sintaksisini tip darajasida string tiplarini yaratish va manipulyatsiya qilish uchun ishlatishi mumkin.",
+            "<strong><code>infer</code> kalit so'zi</strong> shartli tip ichida tipning qismlarini ajratib oladi:",
+            "Bu operatorlar mavjud qiymatlar va tiplardan tiplarni chiqarish imkonini beradi — kodingizni DRY saqlaydi.",
+            "<strong>typeof</strong> qiymatdan tip darajasida tipni ajratib oladi:",
+            "<strong>Indekslangan kirish tiplari</strong> — xususiyatning tipini qidiradi:",
+            "TypeScript <strong>strukturaviy tiplash</strong> dan foydalanadi — tiplar nomlari emas, shakllari mos kelsa muvofiq hisoblanadi.",
+            "<strong>Kovarianslik</strong> deganda kichik tip kutilgan joyda ishlatilishi mumkinligi tushuniladi. <strong>Kontravarianslik</strong> esa teskari — katta tip kichik tip o'rniga ishlatilishi mumkin (funksiya parametrlarida):",
+            "<strong>Ortiqcha xususiyat tekshiruvi</strong> faqat to'g'ridan-to'g'ri tayinlangan ob'ekt literallariga qo'llaniladi:",
+            "<code>tsconfig.json</code> fayli TypeScript kodingizni qanday kompilyatsiya qilishini boshqaradi. Bilishingiz kerak bo'lgan eng muhim opsiyalar:",
+            "<strong>Yo'l taxalluslari</strong> import'larni toza qiladi:",
+            "<strong><code>strict: true</code> nimalarni yoqadi:</strong>",
+            "Dekoratorlar klasslar, metodlar yoki xususiyatlarni o'zgartiradigan funksiyalar. TypeScript 5 TC39 3-bosqich dekoratorlarni qo'llab-quvvatlaydi — standart JavaScript xususiyati.",
+            "<strong>Klass dekoratori</strong> — klassni o'zgartiradi yoki almashtiradi:",
+            "<strong>Dekoratorlar uchun keng tarqalgan foydalanish holatlari:</strong>",
+            "React + TypeScript'ning asosi komponent props'larini tiplashdir. Props uchun interfeys aniqlang, so'ng uni funksiya signaturasida ishlating.",
+            "<strong>Children prop</strong> — renderlash mumkin bo'lgan har qanday narsa uchun <code>React.ReactNode</code> ishlating:",
+            "<strong>React.FC va funksiya deklaratsiyasi</strong> — oddiy funksiyalarni afzal ko'ring:",
+            "Ko'pchilik hook'lar generik bo'lib, tiplarni avtomatik aniqlaydi. Faqat TS aniqlay olmagan yoki boshlang'ich qiymat murakkab bo'lgan hollarda aniq tiplar kerak.",
+            "<strong>useRef</strong> — ikkita keng tarqalgan naqsh:",
+            "<strong>useReducer</strong> — farqlanuvchi birlashmalar bilan ajoyib ishlaydi:",
+            "<strong>Maxsus hook'lar</strong> — murakkab hook'lar uchun qaytish qiymatini aniq tiplang:",
+            "React mahalliy DOM hodisalarini <code>SyntheticEvent</code> tiplariga o'raydi. Inline handler'larda tiplar avtomatik aniqlanadi. Alohida funksiyalar uchun hodisa tipi va element tipini ko'rsating.",
+            "<strong>Keng tarqalgan hodisa tiplari shpargalkasi:</strong>",
+            "Generik komponentlar tip parametrini qabul qilib, ma'lumotlar haqida tip ma'lumotini saqlaydigan qayta foydalaniladigan UI yaratish imkonini beradi.",
+            "<strong>Generik Select komponenti:</strong>",
+            "TypeScript bilan React Context kontekst qiymatini ehtiyotkorlik bilan tiplashni talab qiladi. Tavsiya etilgan naqsh boshlang'ich qiymat sifatida <code>null</code> dan qochadi va maxsus hook taqdim etadi.",
+            "Zod TypeScript'ning kompilyatsiya vaqtidagi tiplari va runtime tekshiruvi orasidagi bo'shliqni to'ldiradi. Sxemani bir marta aniqlab, ham TypeScript tipini, ham runtime tekshiruvchisini olasiz.",
+            "<strong>React Hook Form bilan:</strong>",
+            "<code>forwardRef</code> ota komponentlarga ref'ni bola komponentning DOM elementiga o'tkazish imkonini beradi. Uni to'g'ri tiplash alohida e'tibor talab qiladi.",
+            "<strong>Polimorfik komponentlar</strong> — <code>as</code> prop naqshi komponentga turli HTML elementlar sifatida to'g'ri prop tiplari bilan renderlanish imkonini beradi:",
+            "<strong>ComponentProps yordamchilari</strong> — mahalliy elementlar yoki komponentlardan props'larni ajratib oladi:",
+            "App Router fayl tizimi konvensiyalarini sahifalar, layout'lar va yo'l parametrlari uchun maxsus TypeScript tiplari bilan ishlatadi.",
+            "<strong>Layout tiplari:</strong>",
+            "<strong>Tiplangan params bilan generateMetadata:</strong>",
+            "App Router'da komponentlar <strong>standart holatda Server Component'lardir</strong>. Ular serverda ishlaydi, asinxron bo'lishi mumkin va backend resurslarga to'g'ridan-to'g'ri kirishi mumkin.",
+            "<strong>Client Component</strong> — interaktivlik, hook'lar, brauzer API'lari uchun:",
+            "<strong>Naqsh: Server oladi, Client interaktivlikni boshqaradi:</strong>",
+            "App Router'dagi Route handler'lar <code>route.ts</code> fayllaridan foydalanadi va HTTP metod funksiyalarini (GET, POST va h.k.) eksport qiladi.",
+            "<strong>Dinamik route handler'lar:</strong>",
+            "Server Action'lar serverda ishlaydigan, clientdan chaqiriladigan asinxron funksiyalar. Ular forma yuborish va ma'lumotlar mutatsiyasi uchun API route'larni almashtiradi.",
+            "<strong>Client Component'da useActionState bilan ishlatish:</strong>",
+            "Next.js <code>fetch</code> API'ni keshlash va qayta tekshirish opsiyalari bilan kengaytiradi. Fetch funksiyalaringizni tiplash butun ilovangizdagi tip xavfsizligini ta'minlaydi.",
+            "<strong>Parallel ma'lumotlarni olish:</strong>",
+            "Next.js middleware har bir mos kelgan so'rovdan oldin ishlaydi. U loyiha ildizidagi bitta <code>middleware.ts</code> faylida aniqlanadi.",
+            "<strong>Ilg'or: cookie'larni o'rnatish va geolokatsiya:</strong>",
+            "Maqsad — API javobingizdan UI komponentlarigacha oqadigan yagona tip ta'rifi — takrorlanish yo'q, tip xavfsizligi buzilmaydi.",
+            "<strong>Naqsh: Kirish uchun DTO'lar, chiqish uchun entity'lar:</strong>",
+            "Prisma ma'lumotlar bazasi sxemasidan TypeScript tiplarini avtomatik generatsiya qiladi. Har bir so'rov, munosabat va mutatsiya to'liq tiplangan.",
+            "<strong>API qatlamlari uchun Prisma'ning generatsiya qilingan tiplaridan foydalanish:</strong>",
+            "TanStack Query (React Query) ajoyib TypeScript qo'llab-quvvatlashini taqdim etadi. Tiplar fetch funksiyangizdan komponentlaringizgacha oqadi.",
+            "<strong>Optimistik yangilanishlar bilan useMutation:</strong>",
+            "TypeScript try/catch'dan tashqari kuchli xatolarni boshqarish naqshlarini yoqadi. <strong>Result tipi</strong> xatolarni tip tizimining aniq qismi qiladi.",
+            "<strong>Maxsus xato klasslari</strong> farqlanuvchi birlashmalar bilan:",
+            "<strong>To'liq tekshiruv</strong> <code>never</code> bilan:",
+            "ESLint <code>@typescript-eslint</code> bilan TypeScript kompilatori o'tkazib yuboradigan naqshlarni ushlaydi — foydalanilmagan o'zgaruvchilar, xavfli <code>any</code> tiplar va kutilmagan <code>await</code>lar kabi.",
+            "<strong>Yoqish kerak bo'lgan muhim qoidalar:</strong>",
+            "<strong>Brendlangan tiplar</strong> bir xil primitiv tipni bo'lishuvchi qiymatlarni aralashib ketishini oldini oladi (masalan, userId va postId):",
+            "<strong>Builder naqshi</strong> — tip-xavfsiz fluent API:",
+            "<strong>Tip-xavfsiz hodisa emitteri:</strong>",
+            "Zamonaviy TypeScript testlash to'liq tip qo'llab-quvvatlashi bilan <strong>Vitest</strong> (yoki Jest) dan foydalanadi. Tiplar test sozlamalari, mock'lar va tasdiqlar orqali oqadi.",
+            "<strong>Tiplangan mock'lar</strong> — <code>vi.fn()</code> funksiya signaturalarini saqlaydi:",
+            "<strong>React komponentlarini testlash</strong> Testing Library bilan:",
+            "<strong>Tip darajasida testlash</strong> — tiplarning kompilyatsiya vaqtida to'g'riligini tekshiring:",
+          ],
+
+          keyPoints: [
+            "<code>string</code>, <code>number</code>, <code>boolean</code> uchta asosiy primitiv",
+            "<code>any</code> dan qoching — tip noma'lum bo'lganda <code>unknown</code> ishlating, keyin toraytiring",
+            "<code>void</code> = hech narsa qaytarmaydi, <code>never</code> = hech qachon sodir bo'lmaydi (xato tashlash yoki cheksiz sikl)",
+            "<code>null</code> va <code>undefined</code> alohida tiplar — tsconfig'da <code>strictNullChecks</code> ni yoqing",
+            "Tip tayinlangan qiymatdan aniq bo'lsa, TS ga xulosa chiqarishga ruxsat bering",
+            "Funksiya parametrlarini doimo izohlang — TS ularni xulosa qila olmaydi",
+            "TS xulosa chiqaradiganidan torroq tip kerak bo'lganda izohlang",
+            "Kontekstli tiplash callback'lar, hodisa handler'lar va massiv metodlarida ishlaydi",
+            "Kamroq izoh = tozaroq kod, lekin noaniqlik bo'lganda aniq yozish yaxshiroq",
+            "<code>interface</code> — ob'ekt shakllari uchun eng yaxshi; <code>extends</code> va deklaratsiya birlashtirishni qo'llab-quvvatlaydi",
+            "<code>type</code> — moslashuvchanroq; birlashmalar, kortejlar, primitivlar va mapped tiplarni ifodalay oladi",
+            "Ixtiyoriy xususiyatlar uchun <code>?</code>, o'zgarmas xususiyatlar uchun <code>readonly</code> ishlating",
+            "Interfeyslarni kengaytirish mumkin; tiplar kompozitsiya uchun <code>&amp;</code> kesishmasidan foydalanadi",
+            "Konvensiya: ob'ektlar uchun <code>interface</code>, qolgan hamma narsa uchun <code>type</code>",
+            '<code>|</code> (birlashma) = "bu YOKI u", <code>&amp;</code> (kesishma) = "bu VA u"',
+            "Literal tiplar qiymatlarni aniq string, raqam yoki boolean'larga cheklaydi",
+            "Tipga xos operatsiyalardan foydalanishdan oldin birlashma tiplarni doimo toraytiring",
+            "Farqlanuvchi birlashmalar (umumiy literal maydon) — bilish shart naqsh",
+            "Funksiya parametrlarini doimo izohlang; qaytish tiplari odatda xulosa qilinadi",
+            "Ixtiyoriy parametrlar uchun <code>?</code>, standart qiymatlar uchun <code>= value</code> ishlating",
+            "<code>void</code> = funksiya hech narsa qaytarmaydi; <code>undefined</code> bilan adashtirmang",
+            "Funksiya tip ifodalari: <code>(params) =&gt; returnType</code>",
+            "Overload'lar bitta funksiya uchun bir nechta chaqiruv signaturalarini aniqlash imkonini beradi",
+            "Tiplangan massivlar uchun <code>T[]</code> yoki <code>Array&lt;T&gt;</code>; mutatsiyani oldini olish uchun <code>readonly</code>",
+            "Kortejlar belgilangan uzunlik va har bir pozitsiya uchun tipga ega — funksiya qaytish qiymatlari uchun ajoyib",
+            "Ko'p hollarda enum'lar o'rniga string literal birlashmalarni afzal ko'ring",
+            "<code>as const</code> massiv/ob'ekt qiymatlarini literal tiplariga toraytiradi",
+            "<code>as Type</code> TS ga qiymatni ma'lum tip sifatida ko'rishni aytadi — siz TS dan ko'proq bilganingizda ishlating",
+            "<code>!</code> (non-null tasdiq) null/undefined'ni olib tashlaydi — ehtiyotkorlik bilan ishlating, xatolarni yashirishi mumkin",
+            "<code>satisfies</code> kengaytirmasdan tip mosligini tekshiradi — eng yaxshi variant",
+            "<code>as const</code> qiymatlarni literal tiplariga muzlatadi — config ob'ektlari uchun zarur",
+            "Tasdiqlar faqat kompilyatsiya vaqtida ishlaydi — runtime xulqini o'zgartirmaydi",
+            "Generiklar = tip parametrlari; funksiya/klass bo'ylab tip ma'lumotini saqlaydi",
+            "Qabul qilinadigan tiplarni cheklash uchun <code>extends</code> ishlating",
+            "TS generik tiplarni argumentlardan xulosa qiladi — ularni kamdan-kam ko'rsatish kerak",
+            "Keng tarqalgan naqshlar: <code>ApiResponse&lt;T&gt;</code>, <code>Array&lt;T&gt;</code>, <code>Promise&lt;T&gt;</code>",
+            "Kirish/chiqish tiplari farq qilganda bir nechta tip parametrlarini ishlating (<code>&lt;T, U&gt;</code>)",
+            "Primitivlar uchun <code>typeof</code>, klasslar uchun <code>instanceof</code>, xususiyat tekshirish uchun <code>in</code>",
+            "Farqlanuvchi birlashmalar + switch = toraytirishning oltin standarti",
+            "TS toraytirishni if/else, switch, ternarlar va erta qaytishlar orqali kuzatadi",
+            "Haqiqiylik tekshiruvlari <code>null</code> va <code>undefined</code>'ni chiqarib tashlaydi",
+            "<code>Partial&lt;T&gt;</code> barcha maydonlarni ixtiyoriy qiladi — yangilash operatsiyalari uchun mukammal",
+            "<code>Pick&lt;T, K&gt;</code> maydonlarni tanlaydi, <code>Omit&lt;T, K&gt;</code> olib tashlaydi",
+            "<code>Record&lt;K, V&gt;</code> ma'lum kalit va qiymat tiplari bilan ob'ekt tipini yaratadi",
+            "<code>ReturnType&lt;T&gt;</code> funksiya tipidan qaytish tipini ajratib oladi",
+            'Yordamchilarni birlashtiring: <code>Partial&lt;Omit&lt;T, "id"&gt;&gt;</code> keng tarqalgan naqsh',
+            "Tip himoyachilari tiplarni toraytirish uchun <code>param is Type</code> qaytish tipidan foydalanadi",
+            "Ular toraytirish mantiqini qayta foydalaniladigan funksiyalarga joylashtirish imkonini beradi",
+            "Tasdiq funksiyalari <code>asserts param is Type</code> ishlatadi va muvaffaqiyatsizlikda xato tashlaydi",
+            "API javoblari, kirishni tekshirish va runtime tekshiruvlar uchun juda foydali",
+            "<code>public</code> (standart), <code>private</code>, <code>protected</code> kirishni boshqaradi",
+            "Konstruktor qisqartmasi: <code>constructor(public name: string)</code>",
+            "<code>implements</code> klassning interfeys shartnomasiga mosligini ta'minlaydi",
+            "<code>abstract</code> klasslar bazaviy mantiqni beradi; kichik klasslar abstrakt metodlarni amalga oshirishi shart",
+            "Initsializatsiyadan keyin o'zgarmasligi kerak bo'lgan xususiyatlar uchun <code>readonly</code> ishlating",
+            "Faqat tip import'lari uchun <code>import type</code> ishlating — ular kompilyatsiya vaqtida o'chiriladi",
+            "<code>.d.ts</code> fayllar amalga oshirishsiz tiplarni tavsiflaydi",
+            "<code>@types/*</code> paketlari JS kutubxonalari uchun hamjamiyat tomonidan qo'llab-quvvatlanadigan tiplarni beradi",
+            "<code>declare module</code> tipli bo'lmagan uchinchi tomon modullarni tiplash imkonini beradi",
+            "<code>import</code>/<code>export</code> mavjud bo'lgan har qanday fayl modul; bo'lmasa, global skript",
+            "<code>Promise&lt;T&gt;</code> generik — <code>T</code> hal qilingan qiymatning tipi",
+            "<code>async</code> funksiyalar doimo <code>Promise</code> qaytaradi; <code>await</code> uni ochadi",
+            "<code>Promise.all</code> individual tiplarni tiplangan kortej sifatida saqlaydi",
+            "Catch o'zgaruvchilari <code>unknown</code> — ishlatishdan oldin doimo <code>instanceof</code> bilan toraytiring",
+            "<code>Awaited&lt;T&gt;</code> ichma-ich Promise tiplarni rekursiv ochadi — yordamchi tiplarda foydali",
+            "Mapped tiplar kalitlar bo'ylab takrorlanadi: <code>{ [K in keyof T]: NewType }</code>",
+            "Shartli tiplar tip darajasidagi if/else: <code>T extends U ? X : Y</code>",
+            "Ular birlashmalar ustida avtomatik taqsimlanadi: <code>NonNull&lt;A | B&gt;</code> = <code>NonNull&lt;A&gt; | NonNull&lt;B&gt;</code>",
+            "<code>as</code> bandi takrorlash jarayonida kalitlarni qayta xaritlaydi",
+            "Shablon literal tiplari <code>`${...}`</code> sintaksisi yordamida string tiplar yaratadi",
+            "Shablon literal'lardagi birlashmalar barcha mumkin bo'lgan kombinatsiyalarni hosil qiladi",
+            "<code>infer</code> shartli tiplar ichida tipning qismlarini ushlaydi",
+            "<code>Uppercase</code>, <code>Lowercase</code>, <code>Capitalize</code>, <code>Uncapitalize</code> string tiplarni o'zgartiradi",
+            "<code>keyof T</code> barcha xususiyat nomi stringlarining birlashmasini hosil qiladi",
+            "<code>typeof value</code> runtime qiymatdan tipni ajratib oladi",
+            "<code>T[K]</code> T tipdagi K xususiyatning tipiga kiradi",
+            "Kuchli tip-xavfsiz kirish naqshlari uchun bu operatorlarni birlashtiring",
+            "<code>keyof typeof obj</code> ob'ektlardan kalitlarni ajratib olishning asosiy naqshi",
+            "TypeScript strukturaviy tiplashdan foydalanadi — shakl muhim, nom emas",
+            "Qo'shimcha xususiyatlarga ega tip kamroq xususiyatlarga ega tipga tayinlanishi mumkin (kichik tipdan katta tipga)",
+            "Funksiya parametrlari <code>strictFunctionTypes</code> bilan kontravariant",
+            "Ortiqcha xususiyat tekshiruvi faqat to'g'ridan-to'g'ri ob'ekt literal tayinlashlarida qo'shimcha xususiyatlarni ushlaydi",
+            'Doimo <code>"strict": true</code> ishlating — eng ko\'p xatolarni ushlaydi',
+            "<code>target</code> = qaysi JS versiyasiga chiqarish, <code>module</code> = qaysi modul tizimi",
+            'Zamonaviy paketlangan ilovalar uchun <code>moduleResolution: "bundler"</code> (Vite, webpack, Next.js)',
+            "<code>@/components/Button</code> kabi toza import taxalluslari uchun <code>paths</code> ishlating",
+            "Next.js, Vite va CRA yaxshi standart sozlamalar generatsiya qiladi — har bir opsiya nimani anglatishini bilib oling",
+            "Dekoratorlar klasslar, metodlar yoki maydonlarni o'raydigan funksiyalar",
+            "TS 5+ standart TC39 dekorator spetsifikatsiyasidan foydalanadi (eski <code>experimentalDecorators</code> emas)",
+            "Ular NestJS, TypeORM va Angular'da keng ishlatiladi",
+            "Keng tarqalgan naqshlar: loglash, tekshirish, eslab qolish, kirishni boshqarish",
+            "<code>Props</code> interfeysini aniqlang va funksiya signaturasida destructure qiling",
+            "<code>children</code> tipi uchun <code>React.ReactNode</code> ishlating",
+            "<code>React.FC</code> o'rniga oddiy funksiya deklaratsiyalarini afzal ko'ring",
+            "O'rash komponentlari uchun <code>React.HTMLAttributes</code> yoki <code>ComponentProps</code> ni kengaytiring",
+            "Ixtiyoriy props uchun <code>?</code> ishlating va destructuring orqali standart qiymatlarni bering",
+            "<code>useState</code> boshlang'ich qiymatdan tipni xulosa qiladi; null/murakkab tiplar uchun generiklar ko'rsating",
+            "DOM ref'lari uchun <code>useRef&lt;HTMLElement&gt;(null)</code>, o'zgaruvchan qiymatlar uchun <code>useRef&lt;T&gt;(value)</code>",
+            "<code>useReducer</code> + farqlanuvchi birlashma action'lari = to'liq tip-xavfsiz holat boshqaruvi",
+            "Maxsus hook'lar chaqiruvchilarga tiplarni uzatish uchun generiklardan foydalanadi",
+            "Inline handler'larda hodisa tiplari avtomatik aniqlanadi — izoh kerak emas",
+            "Alohida handler'lar <code>React.XxxEvent&lt;HTMLElement&gt;</code> naqshini ishlatadi",
+            "<code>e.target</code> (umumiy EventTarget) o'rniga <code>e.currentTarget</code> (tiplangan element) ishlating",
+            "<code>MouseEventHandler</code>, <code>ChangeEventHandler</code> va h.k. prop tiplari uchun qisqartma",
+            "Generik komponentlar <code>function Comp&lt;T&gt;(props: Props&lt;T&gt;)</code> sintaksisidan foydalanadi",
+            "Tip parametrlari odatda siz bergan props'lardan xulosa qilinadi",
+            "List, Select, Table, DataGrid va boshqa ma'lumotlarga asoslangan komponentlar uchun ajoyib",
+            "<code>renderItem</code> va <code>onChange</code> kabi callback props'lar tiplangan qiymatlarni oladi",
+            "Kontekstni <code>null</code> standart bilan yarating: <code>createContext&lt;T | null&gt;(null)</code>",
+            "Doimo <code>useContext</code> ni null tekshiruvi bilan maxsus hook'ga o'rang",
+            "Bu foydalanuvchilarga qo'shimcha tekshiruvlarsiz toza, null bo'lmagan tip beradi",
+            "Tashlanadigan xato yetishmayotgan Provider xatolarini darhol ushlashga yordam beradi",
+            "Zod sxemalar runtime tekshiruvchi ham, TS tiplari ham sifatida xizmat qiladigan sxemalarni aniqlaydi",
+            "<code>z.infer&lt;typeof Schema&gt;</code> Zod sxemasidan TypeScript tipini ajratib oladi",
+            "<code>.safeParse()</code> farqlanuvchi birlashma qaytaradi: <code>{ success, data }</code> yoki <code>{ success, error }</code>",
+            "<code>@hookform/resolvers/zod</code> orqali React Hook Form bilan mukammal birlashadi",
+            "Bitta haqiqat manbai: bitta sxema, bitta tip, bitta tekshiruv",
+            "<code>forwardRef&lt;Element, Props&gt;</code> — birinchi generik ref tipi, ikkinchisi props",
+            "Polimorfik <code>as</code> prop bitta komponentga turli elementlar sifatida to'g'ri prop tiplari bilan renderlanish imkonini beradi",
+            "<code>ComponentPropsWithRef</code> / <code>WithoutRef</code> mahalliy HTML elementlardan barcha props'larni ajratib oladi",
+            "<code>React.ComponentProps&lt;typeof X&gt;</code> istalgan maxsus komponentdan props'larni ajratib oladi",
+            "Ref yo'naltirishga aniq ehtiyoj bo'lmasa <code>ComponentPropsWithoutRef</code> ni afzal ko'ring",
+            "Sahifa komponentlari <code>params</code> va <code>searchParams</code> ni Promise props sifatida oladi (Next.js 15+)",
+            "Yo'l parametrlari doimo string; raqamlarni <code>Number(id)</code> bilan ajrating",
+            "Layout komponentlari <code>children: React.ReactNode</code> oladi",
+            'Statik va dinamik metadata uchun <code>"next"</code> dan <code>Metadata</code> tipini ishlating',
+            "Server Component'lar standart, asinxron bo'lishi mumkin va backend'ga to'g'ridan-to'g'ri kirishi mumkin",
+            "Client Component'lar hook'lar va interaktivlik uchun <code>\"use client\"</code> direktivasiga muhtoj",
+            "Serverdan Clientga uzatiladigan props serializatsiya bo'lishi kerak (funksiyalar/klasslar yo'q)",
+            "Naqsh: Server Component'larda ma'lumotlarni oling, interaktivlik uchun Client Component'larga uzating",
+            "Route handler'lar nomlangan funksiyalarni eksport qiladi: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, <code>PATCH</code>",
+            "Birinchi parametr <code>NextRequest</code>, ikkinchisi dinamik yo'llar uchun <code>{ params }</code>",
+            "<code>NextResponse.json(data)</code> tiplangan JSON javoblarni yaratadi",
+            "Runtime xavfsizlik uchun so'rov tanasini Zod bilan tekshiring",
+            'Server Action\'lar <code>"use server"</code> direktivasidan foydalanadi va faqat serverda ishlaydi',
+            "Ular <code>(prevState, formData)</code> oladi va tiplangan holat ob'ektini qaytaradi",
+            "<code>useActionState</code> action'larni holat boshqaruvi bilan formalarga ulaydi",
+            "<code>useFormStatus</code> yuklash ko'rsatkichlari uchun kutish holatini beradi",
+            "Doimo Zod bilan tekshiring — FormData qiymatlari runtime'da tipli emas",
+            "Barqaror xatolarni boshqarish uchun tiplangan <code>fetchApi&lt;T&gt;</code> o'rash funksiyasini yarating",
+            'Vaqtga asoslangan ISR uchun <code>next: { revalidate: N }</code>, SSR uchun <code>cache: "no-store"</code>',
+            "Bir nechta resurslarni parallel olish uchun <code>Promise.all()</code> ishlating",
+            "Talab bo'yicha kesh bekor qilish uchun <code>revalidateTag()</code> va <code>revalidatePath()</code>",
+            "Middleware <code>NextRequest</code> oladigan va <code>NextResponse</code> qaytaradigan funksiyani eksport qiladi",
+            "Qaysi yo'llar middleware'ni ishga tushirishini belgilash uchun <code>config.matcher</code> massivini ishlating",
+            "<code>NextRequest</code> ob'ekti orqali cookie'lar, header'lar, URL va geo'ga kiring",
+            "Keng tarqalgan foydalanish: autentifikatsiya yo'naltirishlari, A/B testlash, til aniqlash, tezlikni cheklash",
+            "Tiplarni bir marta umumiy joyda aniqlang — ularni API, fetch va UI'da ishlating",
+            "Barqaror javob shakllari uchun <code>ApiResponse&lt;T&gt;</code> kabi generik o'rashlarni ishlating",
+            "Kirish uchun DTO'lar, chiqish uchun entity'lar — <code>Omit</code> va <code>Partial</code> bilan hosil qiling",
+            "Zod sxemalari tekshirish + tiplar uchun yagona haqiqat manbai bo'lib xizmat qiladi",
+            "Prisma sxemangizdan tiplar generatsiya qiladi — o'zgarishlardan keyin <code>npx prisma generate</code> bajaring",
+            "Har bir so'rov qaytish tipi siz <code>select</code>/<code>include</code> qilgan narsaga aniq mos keladi",
+            "<code>Prisma.XxxCreateInput</code>, <code>Prisma.XxxUpdateInput</code> — foydalanishga tayyor kirish tiplari",
+            "<code>Prisma.XxxGetPayload&lt;{}&gt;</code> maxsus so'rovlar uchun natija tiplarini ajratib oladi",
+            "<code>useQuery</code> <code>queryFn</code> qaytish tipidan <code>data</code> tipini xulosa qiladi",
+            "<code>useMutation</code> kirishni (<code>variables</code>) ham, chiqishni (<code>data</code>) ham tiplaydi",
+            "So'rov mantiqini kapsulalash uchun maxsus hook'lar yarating (<code>useUsers</code>, <code>useCreateUser</code>)",
+            "<code>error</code> maydoni standart holatda <code>Error</code> sifatida tiplangan",
+            "<code>Result&lt;T, E&gt;</code> xatolarni tipning qismi qiladi — chaqiruvchilar ularni boshqarishi shart",
+            "<code>readonly code</code> bilan maxsus xato klasslari farqlanuvchi birlashma moslishtiruvini yoqadi",
+            "Yetishmayotgan holatlar uchun kompilyatsiya xatolarini olish uchun default holatda <code>never</code> ga tayinlang",
+            "Tiklash mumkin bo'lgan xatolar uchun tashlanadigan istisnolar o'rniga aniq Result tiplarni afzal ko'ring",
+            "Maksimal xavfsizlik uchun <code>strictTypeChecked</code> presetini ishlating",
+            "<code>no-floating-promises</code> unutilgan <code>await</code>'larni ushlaydi — xatolarning keng tarqalgan manbai",
+            "<code>no-explicit-any</code> butun kodingizda to'g'ri tiplashni majburlaydi",
+            "<code>consistent-type-imports</code> yaxshiroq tree-shaking uchun <code>import type</code>'ni majburlaydi",
+            "Tip-xabardor linting qoidalari uchun <code>projectService: true</code> o'rnating",
+            "Brendlangan tiplar bir xil primitiv ID'larni aralashib ketishini oldini oladi (UserId va PostId)",
+            "Builder naqshi to'liq tip xavfsizligi bilan metod zanjirlash uchun <code>return this</code> ishlatadi",
+            "Tip-xavfsiz hodisa emitterlari hodisa nomlari va payload tiplarini bog'lash uchun mapping tipdan foydalanadi",
+            "Bu naqshlar kodingizni o'z-o'zini hujjatlashtiruvchi qiladi va kompilyatsiya vaqtida xatolarni ushlaydi",
+            "Vitest'da TypeScript qo'shimcha sozlamalarsiz native qo'llab-quvvatlanadi",
+            "Interfeyslar bilan tiplangan mock ob'ektlari mock'larning haqiqiy amalga oshirishlarga mosligini ta'minlaydi",
+            "<code>vi.spyOn</code> tip-xavfsiz spy tasdiqlar uchun asl funksiya tiplarini saqlaydi",
+            "Vitest'dagi <code>expectTypeOf</code> kompilyatsiya vaqtida tiplarni tekshiradigan testlar yozish imkonini beradi",
+            "Ma'lum kodning to'g'ri tip xatolar hosil qilishini tasdiqlash uchun <code>@ts-expect-error</code> ishlating",
+          ],
+        };
+
+        /* ── Translation engine ── */
+        function collectElements() {
+          return {
+            themeLabel: document.getElementById("themeLabel"),
+            phaseTitles: document.querySelectorAll(".phase-title"),
+            phaseTags: document.querySelectorAll(".phase-tag"),
+            topicNames: document.querySelectorAll(".topic-name"),
+            topicDescs: document.querySelectorAll(".topic-desc"),
+            h3s: document.querySelectorAll(".topic-content h3"),
+            keyH4s: document.querySelectorAll(".key-points h4"),
+            keyLis: document.querySelectorAll(".key-points li"),
+            paragraphs: document.querySelectorAll(
+              ".topic-content > p, .topic-content-inner > p",
+            ),
+          };
+        }
+
+        function cacheEnglish(key, el) {
+          if (!enCache[key]) enCache[key] = el.innerHTML;
+        }
+
+        function cacheAll(els, prefix) {
+          for (var i = 0; i < els.length; i++) {
+            cacheEnglish(prefix + i, els[i]);
+          }
+        }
+
+        function applyArr(els, arr, prefix) {
+          for (var i = 0; i < els.length && i < arr.length; i++) {
+            cacheEnglish(prefix + i, els[i]);
+            els[i].innerHTML = arr[i];
+          }
+        }
+
+        function restoreArr(els, prefix) {
+          for (var i = 0; i < els.length; i++) {
+            var cached = enCache[prefix + i];
+            if (cached !== undefined) els[i].innerHTML = cached;
+          }
+        }
+
+        function switchLang(lang) {
+          if (lang === currentLang) return;
+          currentLang = lang;
+
+          var els = collectElements();
+
+          if (lang === "uz") {
+            /* Cache and apply */
+            cacheEnglish("title", { innerHTML: document.title });
+            document.title = uz.pageTitle;
+            document.documentElement.lang = "uz";
+
+            cacheEnglish("themeLabel", els.themeLabel);
+            els.themeLabel.innerHTML = uz.themeLabel;
+
+            applyArr(els.phaseTitles, uz.phaseTitles, "pt");
+            applyArr(els.phaseTags, uz.phaseTags, "ptag");
+            applyArr(els.topicNames, uz.topicNames, "tn");
+            applyArr(els.topicDescs, uz.topicDescs, "td");
+            applyArr(els.h3s, uz.h3s, "h3");
+
+            /* Key points titles */
+            for (var k = 0; k < els.keyH4s.length; k++) {
+              cacheEnglish("kh" + k, els.keyH4s[k]);
+              els.keyH4s[k].innerHTML = uz.keyPointsTitle;
+            }
+
+            /* Key points items */
+            applyArr(els.keyLis, uz.keyPoints, "kl");
+
+            /* Paragraphs */
+            applyArr(els.paragraphs, uz.paragraphs, "p");
+          } else {
+            /* Restore English */
+            var titleC = enCache["title"];
+            if (titleC) document.title = titleC;
+            document.documentElement.lang = "en";
+
+            var labelC = enCache["themeLabel"];
+            if (labelC) els.themeLabel.innerHTML = labelC;
+
+            restoreArr(els.phaseTitles, "pt");
+            restoreArr(els.phaseTags, "ptag");
+            restoreArr(els.topicNames, "tn");
+            restoreArr(els.topicDescs, "td");
+            restoreArr(els.h3s, "h3");
+            restoreArr(els.keyH4s, "kh");
+            restoreArr(els.keyLis, "kl");
+            restoreArr(els.paragraphs, "p");
+          }
+
+          try {
+            localStorage.setItem("ts-course-lang", lang);
+          } catch (ex) {}
+        }
+
+        /* ── Toggle button handler ── */
+        var langToggle = document.getElementById("langToggle");
+        if (langToggle) {
+          langToggle.addEventListener(
+            "click",
+            function (e) {
+              var btn = e.target.closest ? e.target.closest(".lang-btn") : null;
+              if (!btn) return;
+              var lang = btn.getAttribute("data-lang");
+              var btns = langToggle.querySelectorAll(".lang-btn");
+              for (var i = 0; i < btns.length; i++)
+                btns[i].classList.remove("active");
+              btn.classList.add("active");
+              switchLang(lang);
+            },
+            false,
+          );
+        }
+
+        /* ── Restore saved language ── */
+        try {
+          var savedLang = localStorage.getItem("ts-course-lang");
+          if (savedLang === "uz") {
+            var uzBtn = langToggle
+              ? langToggle.querySelector('[data-lang="uz"]')
+              : null;
+            var enBtn = langToggle
+              ? langToggle.querySelector('[data-lang="en"]')
+              : null;
+            if (uzBtn) {
+              uzBtn.classList.add("active");
+            }
+            if (enBtn) {
+              enBtn.classList.remove("active");
+            }
+            switchLang("uz");
           }
         } catch (ex) {}
       })();
