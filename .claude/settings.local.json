@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/^          comments: \\\\[/,/^          \\\\],/' \"c:/Users/Asus/Desktop/full_ts/index.html\")"
+    ]
+  }
+}
